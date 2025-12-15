@@ -27,6 +27,9 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Обслуживание статических файлов из client/dist
+app.use(express.static('../client/dist'));
+
 // Логирование запросов
 app.use((req, res, next) => {
   logger.info(`${req.method} ${req.path}`);
@@ -45,19 +48,19 @@ app.use('/api/balances', balancesRouter);
 app.use('/api/admin', adminRouter);
 
 // Корневой маршрут
-app.get('/', (req, res) => {
-  res.json({
-    message: 'Bookkeeping API Server',
-    version: '1.0.0',
-    endpoints: {
-      accounts: '/api/accounts',
-      entries: '/api/entries',
-      balances: '/api/balances',
-      recalculate: '/api/admin/recalculate',
-      health: 'POST /api/admin/health',
-    }
-  });
-});
+// app.get('/', (req, res) => {
+//   res.json({
+//     message: 'Bookkeeping API Server',
+//     version: '1.0.0',
+//     endpoints: {
+//       accounts: '/api/accounts',
+//       entries: '/api/entries',
+//       balances: '/api/balances',
+//       recalculate: '/api/admin/recalculate',
+//       health: 'POST /api/admin/health',
+//     }
+//   });
+// });
 
 // Обработчик 404 для несуществующих маршрутов
 app.use(notFoundHandler);
