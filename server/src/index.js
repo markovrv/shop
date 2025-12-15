@@ -27,14 +27,14 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Обслуживание статических файлов из client/dist
-app.use(express.static('../client/dist'));
-
 // Логирование запросов
 app.use((req, res, next) => {
   logger.info(`${req.method} ${req.path}`);
   next();
 });
+
+// Обслуживание статических файлов
+app.use(express.static('../client/dist'));
 
 // Маршруты API
 import accountsRouter from './routes/accounts.js';
@@ -74,8 +74,9 @@ const startServer = async () => {
     // Инициализируем базу данных
     await initializeDatabase();
     
-    app.listen(PORT, () => {
-      logger.info(`Server is running on port ${PORT}`);
+    const HOST = process.env.HOST || 'localhost';
+    app.listen(PORT, HOST, () => {
+      logger.info(`Server is running on ${HOST}:${PORT}`);
       logger.info(`Database path: ${process.env.DATABASE_PATH || './bookkeeping.db'}`);
     });
   } catch (error) {

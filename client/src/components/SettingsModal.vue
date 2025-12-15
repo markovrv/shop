@@ -6,11 +6,7 @@
         <v-form>
           <v-row>
             <v-col cols="12">
-              <v-text-field
-                v-model="apiUrl"
-                label="API URL"
-                readonly
-              ></v-text-field>
+              <v-text-field v-model="apiUrl" label="API URL" @change="saveApiUrl"></v-text-field>
             </v-col>
             <v-col cols="12">
               <v-btn @click="recalculate">Пересчитать остатки</v-btn>
@@ -23,7 +19,7 @@
         <v-btn @click="closeModal">Закрыть</v-btn>
       </v-card-actions>
     </v-card>
- </v-dialog>
+  </v-dialog>
 </template>
 
 <script setup>
@@ -41,7 +37,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue'])
 
 const uiStore = useUiStore()
-const apiUrl = ref('http://localhost:3000/api')
+const apiUrl = ref(localStorage.getItem('apiUrl') || (window.location.origin + '/api'))
 const localModel = ref(props.modelValue)
 
 // Синхронизируем localModel с пропсом
@@ -65,5 +61,11 @@ const recalculate = async () => {
   } catch (err) {
     uiStore.showError(err.message)
   }
+}
+
+const saveApiUrl = () => {
+  localStorage.setItem('apiUrl', apiUrl.value);
+  // Обновляем страницу для применения новых настроек
+  window.location.reload();
 }
 </script>

@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const API_BASE_URL = 'http://localhost:3000/api'
+// Получаем базовый URL из настроек или используем локальный по умолчанию
+const API_BASE_URL = localStorage.getItem('apiUrl') || (window.location.origin + '/api')
 
 const api = axios.create({
   baseURL: API_BASE_URL,
