@@ -34,7 +34,7 @@ export const entriesApi = {
 }
 
 export const balancesApi = {
-  getAll: (date) => api.get('/balances', { params: { date } })
+  getAll: (startDate, endDate) => api.get('/balances', { params: { startDate, endDate } })
 }
 
 export const adminApi = {

@@ -4,24 +4,26 @@ import { logger } from '../utils/logger.js'
 
 const router = express.Router()
 
-// GET /api/balances - получить остатки по счетам на дату
+// GET /api/balances - получить остатки по счетам за период
 router.get('/', async (req, res, next) => {
   try {
-    const { date = new Date().toISOString().split('T')[0] } = req.query
+    // Если не указана дата начала, используем 2000-01-01
+    // Если не указана дата окончания, используем текущую дату
+    const { startDate = '2000-01-01', endDate = new Date().toISOString().split('T')[0] } = req.query
     
     const accounts = await dbAll('SELECT * FROM accounts ORDER BY type, name')
     
     const balances = await Promise.all(accounts.map(async (account) => {
       const debitResult = await dbAll(
-        `SELECT COALESCE(SUM(amount), 0) as total FROM entries 
-         WHERE debitAccountId = ? AND date <= ?`,
-        [account.id, date]
+        `SELECT COALESCE(SUM(amount), 0) as total FROM entries
+         WHERE debitAccountId = ? AND date >= ? AND date <= ?`,
+        [account.id, startDate, endDate]
       )
       
       const creditResult = await dbAll(
-        `SELECT COALESCE(SUM(amount), 0) as total FROM entries 
-         WHERE creditAccountId = ? AND date <= ?`,
-        [account.id, date]
+        `SELECT COALESCE(SUM(amount), 0) as total FROM entries
+         WHERE creditAccountId = ? AND date >= ? AND date <= ?`,
+        [account.id, startDate, endDate]
       )
       
       const debitSum = debitResult[0]?.total || 0
@@ -54,11 +56,12 @@ router.get('/', async (req, res, next) => {
       }
     }))
     
-    logger.info(`Балансы подсчитаны на дату: ${date}`)
+    logger.info(`Балансы подсчитаны за период с ${startDate} по ${endDate}`)
     res.json({
       success: true,
       data: balances,
-      date
+      startDate,
+      endDate
     })
   } catch (error) {
     logger.error('Ошибка подсчета балансов:', error)

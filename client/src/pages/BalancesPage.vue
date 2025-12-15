@@ -3,8 +3,16 @@
     <v-row class="mb-4">
       <v-col cols="12" md="6">
         <v-text-field
-          v-model="selectedDate"
-          label="Дата"
+          v-model="startDate"
+          label="Дата начала"
+          type="date"
+          @change="handleDateChange"
+        ></v-text-field>
+      </v-col>
+      <v-col cols="12" md="6">
+        <v-text-field
+          v-model="endDate"
+          label="Дата окончания"
           type="date"
           @change="handleDateChange"
         ></v-text-field>
@@ -15,7 +23,7 @@
     </v-row>
 
     <v-card>
-      <v-card-title>Остатки по счетам на {{ selectedDate }}</v-card-title>
+      <v-card-title>Остатки по счетам за период с {{ startDate }} по {{ endDate }}</v-card-title>
       <v-table>
         <thead>
           <tr>
@@ -50,7 +58,8 @@ import { balancesApi } from '../api/client.js'
 import { useUiStore } from '../stores/ui.js'
 
 const uiStore = useUiStore()
-const selectedDate = ref(new Date().toISOString().split('T')[0])
+const startDate = ref('2000-01-01')
+const endDate = ref(new Date().toISOString().split('T')[0])
 const balances = ref([])
 
 const accountTypes = [
@@ -71,7 +80,7 @@ function getAccountTypeTitle(type) {
 
 const handleDateChange = async () => {
   try {
-    const response = await balancesApi.getAll(selectedDate.value)
+    const response = await balancesApi.getAll(startDate.value, endDate.value)
     balances.value = response.data || []
   } catch (err) {
     uiStore.showError(err.message)

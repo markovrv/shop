@@ -28,10 +28,8 @@ router.get('/', async (req, res, next) => {
       params.push(accountId, accountId)
     }
 
-    if (document) {
-      // Экранируем спецсимволы для безопасного использования в LIKE
-      const escapedDocument = parseInt(document.replace(/[%_]/g, (match) => '\\' + match));
-      where.push('document = ' + escapedDocument )
+    if (document > 0) {
+      where.push('document = ' + document )
     }
     
     const whereClause = where.length ? 'WHERE ' + where.join(' AND ') : ''

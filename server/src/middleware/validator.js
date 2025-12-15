@@ -18,7 +18,7 @@ const entrySchema = z.object({
   debitAccountId: z.number().int().positive('Debit account ID must be a positive integer'),
   creditAccountId: z.number().int().positive('Credit account ID must be a positive integer'),
   amount: z.number().positive('Amount must be a positive number'),
-  document: z.number().nullable().optional()
+  document: z.string().nullable().optional()
 });
 
 export const createEntrySchema = entrySchema;
