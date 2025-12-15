@@ -4,17 +4,19 @@
     <v-table>
       <thead>
         <tr>
-          <th>Дата</th>
-          <th>Описание</th>
-          <th>Дебет</th>
-          <th>Кредит</th>
-          <th>Сумма</th>
+          <th @click="sortEntries('date')">Дата</th>
+          <th @click="sortEntries('document')">Документ</th>
+          <th @click="sortEntries('description')">Описание</th>
+          <th @click="sortEntries('debitAccountName')">Дебет</th>
+          <th @click="sortEntries('creditAccountName')">Кредит</th>
+          <th @click="sortEntries('amount')">Сумма</th>
           <th>Действия</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="entry in entriesStore.entries" :key="entry.id">
           <td>{{ entry.date }}</td>
+          <td>{{ entry.document || '-' }}</td>
           <td>{{ entry.description }}</td>
           <td>{{ entry.debitAccountName }}</td>
           <td>{{ entry.creditAccountName }}</td>
@@ -62,6 +64,17 @@ const uiStore = useUiStore()
 onMounted(async () => {
   await entriesStore.fetchEntries()
 })
+
+// Функция сортировки
+const sortEntries = async (field) => {
+  if (entriesStore.sortField === field) {
+    entriesStore.sortDirection = entriesStore.sortDirection === 'asc' ? 'desc' : 'asc';
+  } else {
+    entriesStore.sortField = field;
+    entriesStore.sortDirection = 'asc';
+  }
+  await entriesStore.fetchEntries();
+}
 
 const handlePageChange = async (page) => {
   entriesStore.pagination.page = page

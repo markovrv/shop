@@ -25,6 +25,7 @@ export async function initializeDatabase() {
       debitAccountId INTEGER NOT NULL,
       creditAccountId INTEGER NOT NULL,
       amount REAL NOT NULL,
+      document TEXT NULL,
       createdAt TEXT NOT NULL,
       updatedAt TEXT NOT NULL,
       FOREIGN KEY (debitAccountId) REFERENCES accounts(id),

@@ -8,7 +8,7 @@ const router = express.Router()
 // GET /api/entries - получить журнал с фильтрацией
 router.get('/', async (req, res, next) => {
   try {
-    const { fromDate, toDate, accountId, page = 1, limit = 50 } = req.query
+    const { fromDate, toDate, accountId, document, page = 1, limit = 50 } = req.query
     
     let where = []
     let params = []
@@ -26,6 +26,12 @@ router.get('/', async (req, res, next) => {
     if (accountId) {
       where.push('(debitAccountId = ? OR creditAccountId = ?)')
       params.push(accountId, accountId)
+    }
+
+    if (document) {
+      // Экранируем спецсимволы для безопасного использования в LIKE
+      const escapedDocument = parseInt(document.replace(/[%_]/g, (match) => '\\' + match));
+      where.push('document = ' + escapedDocument )
     }
     
     const whereClause = where.length ? 'WHERE ' + where.join(' AND ') : ''
@@ -70,7 +76,7 @@ router.get('/', async (req, res, next) => {
 // POST /api/entries - создать проводку
 router.post('/', validateRequest(createEntrySchema), async (req, res, next) => {
   try {
-    const { date, description, debitAccountId, creditAccountId, amount } = req.validated
+    const { date, description, debitAccountId, creditAccountId, amount, document } = req.validated
     
     // Проверяем, что дебет ≠ кредит
     if (debitAccountId === creditAccountId) {
@@ -93,9 +99,9 @@ router.post('/', validateRequest(createEntrySchema), async (req, res, next) => {
     
     const now = new Date().toISOString()
     const result = await dbRun(
-      `INSERT INTO entries (date, description, debitAccountId, creditAccountId, amount, createdAt, updatedAt)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [date, description, debitAccountId, creditAccountId, amount, now, now]
+      `INSERT INTO entries (date, description, debitAccountId, creditAccountId, amount, document, createdAt, updatedAt)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [date, description, debitAccountId, creditAccountId, amount, document, now, now]
     )
     
     // Получаем ID последней вставленной записи через отдельный запрос
@@ -127,7 +133,7 @@ router.post('/', validateRequest(createEntrySchema), async (req, res, next) => {
 router.put('/:id', validateRequest(updateEntrySchema), async (req, res, next) => {
   try {
     const { id } = req.params
-    const { date, description, debitAccountId, creditAccountId, amount } = req.validated
+    const { date, description, debitAccountId, creditAccountId, amount, document } = req.validated
     const now = new Date().toISOString()
     
     const existing = await dbGet('SELECT * FROM entries WHERE id = ?', [id])
@@ -190,6 +196,10 @@ router.put('/:id', validateRequest(updateEntrySchema), async (req, res, next) =>
     if (amount !== undefined) {
       updates.push('amount = ?')
       values.push(amount)
+    }
+    if (document !== undefined) {
+      updates.push('document = ?')
+      values.push(document)
     }
     
     if (updates.length > 0) {

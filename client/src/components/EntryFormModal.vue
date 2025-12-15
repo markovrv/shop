@@ -5,12 +5,18 @@
       <v-card-text>
         <v-form ref="formRef">
           <v-row>
-            <v-col cols="12">
+            <v-col cols="6">
               <v-text-field
                 v-model="formData.date"
                 label="Дата"
                 type="date"
                 :rules="[required]"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="6">
+              <v-text-field
+                v-model="formData.document"
+                label="Документ"
               ></v-text-field>
             </v-col>
             <v-col cols="12">
@@ -77,7 +83,8 @@ const formData = ref({
   description: '',
   debitAccountId: null,
   creditAccountId: null,
-  amount: null
+  amount: null,
+  document: ''
 })
 
 // Загружаем счета при создании компонента
@@ -92,7 +99,8 @@ watch(() => uiStore.editingEntry, (newEntry) => {
       description: newEntry.description,
       debitAccountId: newEntry.debitAccountId,
       creditAccountId: newEntry.creditAccountId,
-      amount: newEntry.amount
+      amount: newEntry.amount,
+      document: newEntry.document || ''
     }
   } else {
     // Создание новой проводки
@@ -101,7 +109,8 @@ watch(() => uiStore.editingEntry, (newEntry) => {
       description: '',
       debitAccountId: null,
       creditAccountId: null,
-      amount: null
+      amount: null,
+      document: ''
     }
  }
 }, { immediate: true })
@@ -123,6 +132,8 @@ const saveEntry = async () => {
   if (!valid) return
 
   formData.value.amount = parseInt(formData.value.amount)
+  if (formData.value.document)
+    formData.value.document = parseInt(formData.value.document)
 
   try {
     if (uiStore.editingEntry) {

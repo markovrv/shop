@@ -9,25 +9,38 @@ export const useEntriesStore = defineStore('entries', () => {
   const filters = ref({
     fromDate: null,
     toDate: null,
-    accountId: null
+    accountId: null,
+    documentNumber: ''
   })
   const pagination = ref({
     page: 1,
     limit: 50,
     total: 0
   })
+  
+  const sortField = ref('date')
+  const sortDirection = ref('asc')
 
   const fetchEntries = async (customFilters = {}) => {
     loading.value = true
     error.value = null
     try {
-      const params = {
-        ...filters.value,
+      // Преобразуем параметры фильтрации для соответствия API
+      const apiParams = {
         ...customFilters,
         page: pagination.value.page,
-        limit: pagination.value.limit
-      }
-      const response = await entriesApi.getAll(params)
+        limit: pagination.value.limit,
+        sortBy: sortField.value,
+        sortOrder: sortDirection.value
+      };
+      
+      // Добавляем фильтры, преобразуя documentNumber в document
+      if (filters.value.fromDate) apiParams.fromDate = filters.value.fromDate;
+      if (filters.value.toDate) apiParams.toDate = filters.value.toDate;
+      if (filters.value.accountId) apiParams.accountId = filters.value.accountId;
+      if (filters.value.documentNumber) apiParams.document = filters.value.documentNumber;
+      
+      const response = await entriesApi.getAll(apiParams)
       entries.value = response.data || []
       pagination.value = response.pagination || pagination.value
     } catch (err) {
@@ -90,7 +103,7 @@ export const useEntriesStore = defineStore('entries', () => {
   }
 
   const clearFilters = () => {
-    filters.value = { fromDate: null, toDate: null, accountId: null }
+    filters.value = { fromDate: null, toDate: null, accountId: null, documentNumber: '' }
     pagination.value.page = 1
   }
 
@@ -100,6 +113,8 @@ export const useEntriesStore = defineStore('entries', () => {
     error,
     filters,
     pagination,
+    sortField,
+    sortDirection,
     fetchEntries,
     createEntry,
     updateEntry,
