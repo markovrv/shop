@@ -22,8 +22,7 @@ const entrySchema = z.object({
 
 export const createEntrySchema = entrySchema;
 export const updateEntrySchema = entrySchema
-  .omit({ debitAccountId: true, creditAccountId: true }) // Не позволяем изменять счета
-  .partial();
+  .partial(); // Разрешаем изменять все поля, включая счета
 
 // Middleware для валидации
 export const validateRequest = (schema) => {

@@ -127,7 +127,7 @@ router.post('/', validateRequest(createEntrySchema), async (req, res, next) => {
 router.put('/:id', validateRequest(updateEntrySchema), async (req, res, next) => {
   try {
     const { id } = req.params
-    const { date, description, amount } = req.validated
+    const { date, description, debitAccountId, creditAccountId, amount } = req.validated
     const now = new Date().toISOString()
     
     const existing = await dbGet('SELECT * FROM entries WHERE id = ?', [id])
@@ -138,6 +138,36 @@ router.put('/:id', validateRequest(updateEntrySchema), async (req, res, next) =>
       })
     }
     
+    // Если изменяются счета, проверяем их существование
+    if (debitAccountId !== undefined && debitAccountId !== existing.debitAccountId) {
+      const debitAccount = await dbGet('SELECT id FROM accounts WHERE id = ?', [debitAccountId])
+      if (!debitAccount) {
+        return res.status(400).json({
+          success: false,
+          error: 'Дебетовый счёт не существует'
+        })
+      }
+    }
+    if (creditAccountId !== undefined && creditAccountId !== existing.creditAccountId) {
+      const creditAccount = await dbGet('SELECT id FROM accounts WHERE id = ?', [creditAccountId])
+      if (!creditAccount) {
+        return res.status(400).json({
+          success: false,
+          error: 'Кредитный счёт не существует'
+        })
+      }
+    }
+
+    // Проверяем, что дебетовый и кредитный счета не совпадают (если оба изменены)
+    if ((debitAccountId !== undefined && creditAccountId !== undefined && debitAccountId === creditAccountId) ||
+        (debitAccountId !== undefined && debitAccountId === existing.creditAccountId) ||
+        (creditAccountId !== undefined && creditAccountId === existing.debitAccountId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Дебетовый и кредитный счета должны быть разными'
+      })
+    }
+
     const updates = []
     const values = []
     
@@ -148,6 +178,14 @@ router.put('/:id', validateRequest(updateEntrySchema), async (req, res, next) =>
     if (description !== undefined) {
       updates.push('description = ?')
       values.push(description)
+    }
+    if (debitAccountId !== undefined) {
+      updates.push('debitAccountId = ?')
+      values.push(debitAccountId)
+    }
+    if (creditAccountId !== undefined) {
+      updates.push('creditAccountId = ?')
+      values.push(creditAccountId)
     }
     if (amount !== undefined) {
       updates.push('amount = ?')
@@ -166,7 +204,7 @@ router.put('/:id', validateRequest(updateEntrySchema), async (req, res, next) =>
     }
     
     const updated = await dbGet(
-      `SELECT e.*, 
+      `SELECT e.*,
               da.name as debitAccountName,
               ca.name as creditAccountName
        FROM entries e
