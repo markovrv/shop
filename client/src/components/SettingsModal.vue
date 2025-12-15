@@ -32,29 +32,29 @@ import { adminApi } from '../api/client.js'
 import { useUiStore } from '../stores/ui.js'
 
 const props = defineProps({
- model: {
+  modelValue: {
     type: Boolean,
     required: true
   }
 })
 
-const emit = defineEmits(['update:model'])
+const emit = defineEmits(['update:modelValue'])
 
 const uiStore = useUiStore()
 const apiUrl = ref('http://localhost:3000/api')
-const localModel = ref(props.model)
+const localModel = ref(props.modelValue)
 
 // Синхронизируем localModel с пропсом
-watch(() => props.model, (newVal) => {
+watch(() => props.modelValue, (newVal) => {
   localModel.value = newVal
 })
 
 const handleModelUpdate = (val) => {
- emit('update:model', val)
+  emit('update:modelValue', val)
 }
 
 const closeModal = () => {
-  emit('update:model', false)
+  emit('update:modelValue', false)
 }
 
 const recalculate = async () => {

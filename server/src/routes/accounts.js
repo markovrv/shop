@@ -14,7 +14,7 @@ router.get('/', async (req, res, next) => {
       data: accounts
     })
   } catch (error) {
-    logger.error('Error fetching accounts:', error)
+    logger.error('Ошибка получения счетов:', error)
     next(error)
   }
 })
@@ -46,10 +46,10 @@ router.post('/', validateRequest(createAccountSchema), async (req, res, next) =>
     if (error.message.includes('UNIQUE constraint failed')) {
       return res.status(400).json({
         success: false,
-        error: 'Account with this name already exists'
+        error: 'Счёт с таким названием уже существует'
       })
     }
-    logger.error('Error creating account:', error)
+    logger.error('Ошибка создания счёта:', error)
     next(error)
   }
 })
@@ -58,14 +58,14 @@ router.post('/', validateRequest(createAccountSchema), async (req, res, next) =>
 router.put('/:id', validateRequest(updateAccountSchema), async (req, res, next) => {
   try {
     const { id } = req.params
-    const { name, initialBalance } = req.validated
+    const { name, type, initialBalance } = req.validated
     const now = new Date().toISOString()
     
     const existing = await dbGet('SELECT * FROM accounts WHERE id = ?', [id])
     if (!existing) {
       return res.status(404).json({
         success: false,
-        error: 'Account not found'
+        error: 'Счёт не найден'
       })
     }
     
@@ -75,6 +75,10 @@ router.put('/:id', validateRequest(updateAccountSchema), async (req, res, next) 
     if (name !== undefined) {
       updates.push('name = ?')
       values.push(name)
+    }
+    if (type !== undefined) {
+      updates.push('type = ?')
+      values.push(type)
     }
     if (initialBalance !== undefined) {
       updates.push('initialBalance = ?')
@@ -94,7 +98,7 @@ router.put('/:id', validateRequest(updateAccountSchema), async (req, res, next) 
     
     const updated = await dbGet('SELECT * FROM accounts WHERE id = ?', [id])
     
-    logger.info(`Account updated: ID ${id}`)
+    logger.info(`Счёт обнолвлён: ID ${id}`)
     res.json({
       success: true,
       data: updated
@@ -103,10 +107,10 @@ router.put('/:id', validateRequest(updateAccountSchema), async (req, res, next) 
     if (error.message.includes('UNIQUE constraint failed')) {
       return res.status(400).json({
         success: false,
-        error: 'Account with this name already exists'
+        error: 'Счёт с таким названием уде существует'
       })
     }
-    logger.error('Error updating account:', error)
+    logger.error('Ошибка обновления счёта:', error)
     next(error)
   }
 })
@@ -120,7 +124,7 @@ router.delete('/:id', async (req, res, next) => {
     if (!existing) {
       return res.status(404).json({
         success: false,
-        error: 'Account not found'
+        error: 'Счёт не найден'
       })
     }
     
@@ -134,7 +138,7 @@ router.delete('/:id', async (req, res, next) => {
     if (usage.count > 0) {
       return res.status(409).json({
         success: false,
-        error: 'Cannot delete account with existing entries'
+        error: 'Нельзя удалять счёт, у которого есть проводки.'
       })
     }
     
@@ -143,10 +147,10 @@ router.delete('/:id', async (req, res, next) => {
     logger.info(`Account deleted: ID ${id}`)
     res.json({
       success: true,
-      message: 'Account deleted'
+      message: 'Счёт удалён'
     })
   } catch (error) {
-    logger.error('Error deleting account:', error)
+    logger.error('Ошибка удаления счёта:', error)
     next(error)
   }
 })

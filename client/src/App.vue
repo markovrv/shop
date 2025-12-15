@@ -29,7 +29,7 @@
       <v-divider></v-divider>
       <v-list>
         <v-list-item
-          active-color="warning"
+          color="warning"
           @click="openSettingsModal"
         >
           <template v-slot:prepend>
@@ -57,7 +57,7 @@
     </v-snackbar>
 
     <!-- Settings Modal -->
-    <SettingsModal v-model="showSettings" @update:model="(val) => {showSettings = val}" />
+    <SettingsModal v-model="showSettings" />
   </v-app>
 </template>
 
@@ -67,6 +67,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useUiStore } from './stores/ui.js'
 import { useAccountsStore } from './stores/accounts.js'
 import { useEntriesStore } from './stores/entries.js'
+import { useTheme } from 'vuetify'
 import SettingsModal from './components/SettingsModal.vue'
 
 const drawer = ref(false)
@@ -76,6 +77,7 @@ const router = useRouter()
 const uiStore = useUiStore()
 const accountsStore = useAccountsStore()
 const entriesStore = useEntriesStore()
+const theme = useTheme()
 
 const navItems = [
   { id: 'entries', title: 'Проводки', icon: 'mdi-book-multiple', route: '/entries' },
@@ -88,8 +90,7 @@ const isActiveRoute = (routeId) => {
 }
 
 const toggleTheme = () => {
-  const current = $vuetify.theme.global.current
-  current.dark = !current.dark
+  theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
 }
 
 const openSettingsModal = () => {

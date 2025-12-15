@@ -54,14 +54,14 @@ router.get('/', async (req, res, next) => {
       }
     }))
     
-    logger.info(`Balances calculated for date: ${date}`)
+    logger.info(`Балансы подсчитаны на дату: ${date}`)
     res.json({
       success: true,
       data: balances,
       date
     })
   } catch (error) {
-    logger.error('Error calculating balances:', error)
+    logger.error('Ошибка подсчета балансов:', error)
     next(error)
  }
 })

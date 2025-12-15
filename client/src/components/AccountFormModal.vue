@@ -54,7 +54,7 @@ const formRef = ref(null)
 const accountTypes = [
   { title: 'Актив', value: 'asset' },
   { title: 'Пассив', value: 'liability' },
- { title: 'Капитал', value: 'equity' },
+  { title: 'Капитал', value: 'equity' },
   { title: 'Доход', value: 'income' },
   { title: 'Расход', value: 'expense' }
 ]
@@ -95,6 +95,8 @@ const closeModal = () => {
 const saveAccount = async () => {
   const { valid } = await formRef.value.validate()
   if (!valid) return
+
+  formData.value.initialBalance = parseInt(formData.value.initialBalance) || 0
 
   try {
     if (uiStore.editingAccount) {

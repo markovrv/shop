@@ -30,7 +30,7 @@
         <tbody>
           <tr v-for="balance in balances" :key="balance.accountId">
             <td>{{ balance.accountName }}</td>
-            <td>{{ balance.accountType }}</td>
+            <td>{{ getAccountTypeTitle(balance.accountType) }}</td>
             <td>{{ balance.initialBalance }}</td>
             <td>{{ balance.debitSum }}</td>
             <td>{{ balance.creditSum }}</td>
@@ -52,6 +52,22 @@ import { useUiStore } from '../stores/ui.js'
 const uiStore = useUiStore()
 const selectedDate = ref(new Date().toISOString().split('T')[0])
 const balances = ref([])
+
+const accountTypes = [
+  { title: 'Актив', value: 'asset' },
+  { title: 'Пассив', value: 'liability' },
+  { title: 'Капитал', value: 'equity' },
+  { title: 'Доход', value: 'income' },
+  { title: 'Расход', value: 'expense' }
+]
+
+function getAccountTypeTitle(type) {
+  try {
+    return accountTypes.find((t) => t.value === type).title
+  } catch (err) {
+    return type
+  }
+}
 
 const handleDateChange = async () => {
   try {

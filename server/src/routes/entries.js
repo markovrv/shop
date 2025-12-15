@@ -62,7 +62,7 @@ router.get('/', async (req, res, next) => {
       }
     })
  } catch (error) {
-    logger.error('Error fetching entries:', error)
+    logger.error('Ошибка получения проводок:', error)
     next(error)
   }
 })
@@ -76,7 +76,7 @@ router.post('/', validateRequest(createEntrySchema), async (req, res, next) => {
     if (debitAccountId === creditAccountId) {
       return res.status(400).json({
         success: false,
-        error: 'Debit and credit accounts must be different'
+        error: 'Дебетовый и кредитный счета должны быть разными'
       })
     }
     
@@ -87,7 +87,7 @@ router.post('/', validateRequest(createEntrySchema), async (req, res, next) => {
     if (!debitAccount || !creditAccount) {
       return res.status(400).json({
         success: false,
-        error: 'One or both accounts do not exist'
+        error: 'Один или оба счёта не существуют'
       })
     }
     
@@ -112,13 +112,13 @@ router.post('/', validateRequest(createEntrySchema), async (req, res, next) => {
      [lastIdResult.id]
    )
    
-   logger.info(`Entry created: ID ${lastIdResult.id}, Amount: ${amount}`)
+   logger.info(`Проводка создана: ID ${lastIdResult.id}, Amount: ${amount}`)
     res.status(201).json({
       success: true,
       data: entry
     })
   } catch (error) {
-    logger.error('Error creating entry:', error)
+    logger.error('Ошибка создания проводки:', error)
     next(error)
   }
 })
@@ -134,7 +134,7 @@ router.put('/:id', validateRequest(updateEntrySchema), async (req, res, next) =>
     if (!existing) {
       return res.status(404).json({
         success: false,
-        error: 'Entry not found'
+        error: 'Проводка не существует'
       })
     }
     
@@ -176,13 +176,13 @@ router.put('/:id', validateRequest(updateEntrySchema), async (req, res, next) =>
       [id]
     )
     
-    logger.info(`Entry updated: ID ${id}`)
+    logger.info(`Проводка обновлена: ID ${id}`)
     res.json({
       success: true,
       data: updated
     })
   } catch (error) {
-    logger.error('Error updating entry:', error)
+    logger.error('Ошибка обновления проводки:', error)
     next(error)
  }
 })
@@ -196,7 +196,7 @@ router.delete('/:id', async (req, res, next) => {
     if (!existing) {
       return res.status(404).json({
         success: false,
-        error: 'Entry not found'
+        error: 'Проводка не найдена'
       })
     }
     
@@ -205,7 +205,7 @@ router.delete('/:id', async (req, res, next) => {
     logger.info(`Entry deleted: ID ${id}`)
     res.json({
       success: true,
-      message: 'Entry deleted'
+      message: 'Проводка удалена'
     })
   } catch (error) {
     logger.error('Error deleting entry:', error)

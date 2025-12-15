@@ -26,7 +26,7 @@
         <tbody>
           <tr v-for="account in accountsStore.accounts" :key="account.id">
             <td>{{ account.name }}</td>
-            <td>{{ account.type }}</td>
+            <td>{{ getAccountTypeTitle(account.type) }}</td>
             <td>{{ account.initialBalance }}</td>
             <td>
               <v-btn
@@ -56,6 +56,22 @@
 import { useUiStore } from '../stores/ui.js'
 import { useAccountsStore } from '../stores/accounts.js'
 import AccountFormModal from '../components/AccountFormModal.vue'
+
+const accountTypes = [
+  { title: 'Актив', value: 'asset' },
+  { title: 'Пассив', value: 'liability' },
+  { title: 'Капитал', value: 'equity' },
+  { title: 'Доход', value: 'income' },
+  { title: 'Расход', value: 'expense' }
+]
+
+function getAccountTypeTitle(type) {
+  try {
+    return accountTypes.find((t) => t.value === type).title
+  } catch (err) {
+    return type
+  }
+}
 
 const uiStore = useUiStore()
 const accountsStore = useAccountsStore()
