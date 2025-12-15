@@ -1,0 +1,42 @@
+import axios from 'axios'
+
+const API_BASE_URL = 'http://localhost:3000/api'
+
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
+
+// Обработка ошибок
+api.interceptors.response.use(
+  response => response.data,
+  error => {
+    const message = error.response?.data?.error || error.message
+    return Promise.reject(new Error(message))
+  }
+)
+
+export const accountsApi = {
+  getAll: () => api.get('/accounts'),
+  create: (data) => api.post('/accounts', data),
+  update: (id, data) => api.put(`/accounts/${id}`, data),
+  delete: (id) => api.delete(`/accounts/${id}`)
+}
+
+export const entriesApi = {
+ getAll: (params = {}) => api.get('/entries', { params }),
+  create: (data) => api.post('/entries', data),
+  update: (id, data) => api.put(`/entries/${id}`, data),
+  delete: (id) => api.delete(`/entries/${id}`)
+}
+
+export const balancesApi = {
+  getAll: (date) => api.get('/balances', { params: { date } })
+}
+
+export const adminApi = {
+  recalculate: () => api.post('/admin/recalculate'),
+  health: () => api.get('/admin/health')
+}
