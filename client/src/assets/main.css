@@ -4,3 +4,24 @@
   font-weight: normal;
 }
 
+.kopecks {
+  font-size: 0.7em;
+  color: rgba(136, 136, 136, 0.9);
+  opacity: 0.9;
+}
+
+.pagination-container {
+  padding: 16px !important;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination-info {
+  margin-right: 16px;
+  font-size: 0.875rem;
+  color: #666;
+}

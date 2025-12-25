@@ -39,11 +39,11 @@
           <tr v-for="balance in balances" :key="balance.accountId">
             <td>{{ balance.accountName }}</td>
             <td>{{ getAccountTypeTitle(balance.accountType) }}</td>
-            <td>{{ balance.initialBalance }}</td>
-            <td>{{ balance.debitSum }}</td>
-            <td>{{ balance.creditSum }}</td>
+            <td><span v-html="formatCurrency(balance.initialBalance)"></span></td>
+            <td><span v-html="formatCurrency(balance.debitSum)"></span></td>
+            <td><span v-html="formatCurrency(balance.creditSum)"></span></td>
             <td :style="{ fontWeight: 'bold', color: balance.balance >= 0 ? 'green' : 'red' }">
-              {{ balance.balance }}
+              <span v-html="formatCurrency(balance.balance)"></span>
             </td>
           </tr>
         </tbody>
@@ -76,6 +76,26 @@ function getAccountTypeTitle(type) {
   } catch (err) {
     return type
   }
+}
+
+// Функция форматирования валюты для отображения с копейками
+const formatCurrency = (amount) => {
+  if (amount === null || amount === undefined) return '';
+  
+  const number = parseFloat(amount);
+  if (isNaN(number)) return '';
+  
+  // Разделяем целую и дробную части
+  const [integerPart, decimalPart] = number.toFixed(2).split('.');
+  
+  // Если дробная часть равна 00, не отображаем копейки
+  if (decimalPart === '00') {
+    return new Intl.NumberFormat('ru-RU').format(parseInt(integerPart));
+  }
+  
+  // Иначе форматируем с выделением копеек
+  const formattedInteger = new Intl.NumberFormat('ru-RU').format(parseInt(integerPart));
+  return `${formattedInteger}<span class="kopecks">.${decimalPart}</span>`;
 }
 
 const handleDateChange = async () => {

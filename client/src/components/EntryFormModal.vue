@@ -51,6 +51,7 @@
                 v-model="formData.amount"
                 label="Сумма"
                 type="number"
+                step="0.01"
                 :rules="[required, positive]"
               ></v-text-field>
             </v-col>
@@ -128,24 +129,37 @@ const closeModal = () => {
 }
 
 const saveEntry = async () => {
-  const { valid } = await formRef.value.validate()
-  if (!valid) return
+   const { valid } = await formRef.value.validate()
+   if (!valid) return
 
-  formData.value.amount = parseInt(formData.value.amount)
-  if (formData.value.document)
-    formData.value.document = parseInt(formData.value.document)
+   // Преобразуем сумму в число и проверяем, что она положительная
+   const amount = parseFloat(formData.value.amount);
+   if (isNaN(amount) || amount <= 0) {
+     uiStore.showError('Сумма должна быть положительным числом');
+     return;
+   }
 
-  try {
-    if (uiStore.editingEntry) {
-      await entriesStore.updateEntry(uiStore.editingEntry.id, formData.value)
-      uiStore.showSuccess('Проводка обновлена')
-    } else {
-      await entriesStore.createEntry(formData.value)
-      uiStore.showSuccess('Проводка создана')
-    }
-    closeModal()
-  } catch (err) {
-    uiStore.showError(err.message)
-  }
+   // Не преобразуем сумму в целое число, чтобы сохранить копейки
+   if (formData.value.document)
+     formData.value.document = parseInt(formData.value.document)
+
+   try {
+     // Преобразуем строковые значения в числа перед отправкой на сервер
+     const dataToSend = {
+       ...formData.value,
+       amount: amount
+     };
+     
+     if (uiStore.editingEntry) {
+       await entriesStore.updateEntry(uiStore.editingEntry.id, dataToSend)
+       uiStore.showSuccess('Проводка обновлена')
+     } else {
+       await entriesStore.createEntry(dataToSend)
+       uiStore.showSuccess('Проводка создана')
+     }
+     closeModal()
+   } catch (err) {
+     uiStore.showError(err.message)
+   }
 }
 </script>

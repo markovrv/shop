@@ -17,7 +17,13 @@ const entrySchema = z.object({
   description: z.string().min(1, 'Description is required').max(500),
   debitAccountId: z.number().int().positive('Debit account ID must be a positive integer'),
   creditAccountId: z.number().int().positive('Credit account ID must be a positive integer'),
-  amount: z.number().positive('Amount must be a positive number'),
+  amount: z.preprocess((val) => {
+    if (typeof val === 'string') {
+      const parsed = parseFloat(val);
+      return isNaN(parsed) ? val : parsed;
+    }
+    return val;
+  }, z.number().positive('Сумма должна быть положительным числом.').multipleOf(0.01, 'В сумме должно быть только два дробных знака после запятой')),
   document: z.string().nullable().optional()
 });
 

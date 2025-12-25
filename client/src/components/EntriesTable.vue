@@ -20,7 +20,7 @@
           <td>{{ entry.description }}</td>
           <td>{{ entry.debitAccountName }}</td>
           <td>{{ entry.creditAccountName }}</td>
-          <td>{{ entry.amount }}</td>
+          <td><span v-html="formatCurrency(entry.amount)"></span></td>
           <td>
             <v-btn
               size="small"
@@ -74,6 +74,26 @@ const sortEntries = async (field) => {
     entriesStore.sortDirection = 'asc';
   }
   await entriesStore.fetchEntries();
+}
+
+// Функция форматирования валюты для отображения с копейками
+const formatCurrency = (amount) => {
+  if (amount === null || amount === undefined) return '';
+  
+  const number = parseFloat(amount);
+  if (isNaN(number)) return '';
+  
+  // Разделяем целую и дробную части
+  const [integerPart, decimalPart] = number.toFixed(2).split('.');
+  
+  // Если дробная часть равна 00, не отображаем копейки
+  if (decimalPart === '00') {
+    return new Intl.NumberFormat('ru-RU').format(parseInt(integerPart));
+  }
+  
+  // Иначе форматируем с выделением копеек
+  const formattedInteger = new Intl.NumberFormat('ru-RU').format(parseInt(integerPart));
+  return `${formattedInteger}<span class="kopecks">.${decimalPart}</span>`;
 }
 
 const handlePageChange = async (page) => {
