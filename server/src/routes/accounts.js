@@ -23,7 +23,7 @@ router.get('/', async (req, res, next) => {
 router.post('/', validateRequest(createAccountSchema), async (req, res, next) => {
   try {
     const { name, type, initialBalance } = req.validated
-    const now = new Date().toISOString()
+    const now = new Date().toISOString().replace('T', ' ').replace('Z', '')
     
     const result = await dbRun(
       `INSERT INTO accounts (name, type, initialBalance, createdAt, updatedAt) 
@@ -32,7 +32,7 @@ router.post('/', validateRequest(createAccountSchema), async (req, res, next) =>
     )
     
     // Получаем ID последней вставленной записи через отдельный запрос
-    const lastIdResult = await dbGet('SELECT last_insert_rowid() as id');
+    const lastIdResult = await dbGet('SELECT LAST_INSERT_ID() as id');
     const newAccountId = lastIdResult.id;
     
     const account = await dbGet('SELECT * FROM accounts WHERE id = ?', [newAccountId])
@@ -59,7 +59,7 @@ router.put('/:id', validateRequest(updateAccountSchema), async (req, res, next) 
   try {
     const { id } = req.params
     const { name, type, initialBalance } = req.validated
-    const now = new Date().toISOString()
+    const now = new Date().toISOString().replace('T', ' ').replace('Z', '')
     
     const existing = await dbGet('SELECT * FROM accounts WHERE id = ?', [id])
     if (!existing) {

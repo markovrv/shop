@@ -24,7 +24,7 @@ const entrySchema = z.object({
     }
     return val;
   }, z.number().positive('Сумма должна быть положительным числом.').multipleOf(0.01, 'В сумме должно быть только два дробных знака после запятой')),
-  document: z.string().nullable().optional()
+  document: z.union([z.string(), z.number()]).nullable().optional()
 });
 
 export const createEntrySchema = entrySchema;
@@ -63,5 +63,5 @@ export const validateRequest = (schema) => {
       
       next(error);
     }
- };
+  };
 };

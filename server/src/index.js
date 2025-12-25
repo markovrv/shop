@@ -6,7 +6,7 @@ import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { logger } from './utils/logger.js';
 
 // Загружаем переменные окружения
-dotenv.config();
+dotenv.config({path: '../.env'}); 
 
 // Инициализируем приложение
 const app = express();
@@ -16,10 +16,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors({
   origin: [
     'http://localhost:3000',
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    'http://localhost:3001',
-    'http://127.0.0.1:3001'
+    'http://localhost:5173'
   ],
   credentials: true
 }));
@@ -47,21 +44,6 @@ app.use('/api/entries', entriesRouter);
 app.use('/api/balances', balancesRouter);
 app.use('/api/admin', adminRouter);
 
-// Корневой маршрут
-// app.get('/', (req, res) => {
-//   res.json({
-//     message: 'Bookkeeping API Server',
-//     version: '1.0.0',
-//     endpoints: {
-//       accounts: '/api/accounts',
-//       entries: '/api/entries',
-//       balances: '/api/balances',
-//       recalculate: '/api/admin/recalculate',
-//       health: 'POST /api/admin/health',
-//     }
-//   });
-// });
-
 // Обработчик 404 для несуществующих маршрутов
 app.use(notFoundHandler);
 
@@ -77,11 +59,11 @@ const startServer = async () => {
     const HOST = process.env.HOST || 'localhost';
     app.listen(PORT, HOST, () => {
       logger.info(`Server is running on ${HOST}:${PORT}`);
-      logger.info(`Database path: ${process.env.DATABASE_PATH || './bookkeeping.db'}`);
+      logger.info(`Database: MySQL at ${process.env.DB_HOST || 'localhost'}:${process.env.DB_PORT || '3306'}/${process.env.DB_NAME || 'shop'}`);
     });
   } catch (error) {
     logger.error('Failed to start server:', error);
-    process.exit(1);
+    process.exit(1); 
   }
 };
 

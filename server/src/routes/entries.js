@@ -44,7 +44,7 @@ router.get('/', async (req, res, next) => {
     // Получить записи с пагинацией
     const offset = (page - 1) * limit
     const entries = await dbAll(
-      `SELECT e.*, 
+      `SELECT e.*,
               da.name as debitAccountName,
               ca.name as creditAccountName
        FROM entries e
@@ -52,8 +52,8 @@ router.get('/', async (req, res, next) => {
        LEFT JOIN accounts ca ON e.creditAccountId = ca.id
        ${whereClause}
        ORDER BY e.date DESC, e.createdAt DESC
-       LIMIT ? OFFSET ?`,
-      [...params, limit, offset]
+       LIMIT ${parseInt(limit) || 50} OFFSET ${parseInt(offset) || 0}`,
+      params
     )
     
     res.json({
@@ -95,7 +95,7 @@ router.post('/', validateRequest(createEntrySchema), async (req, res, next) => {
       })
     }
     
-    const now = new Date().toISOString()
+    const now = new Date().toISOString().replace('T', ' ').replace('Z', '')
     const result = await dbRun(
       `INSERT INTO entries (date, description, debitAccountId, creditAccountId, amount, document, createdAt, updatedAt)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -103,10 +103,10 @@ router.post('/', validateRequest(createEntrySchema), async (req, res, next) => {
     )
     
     // Получаем ID последней вставленной записи через отдельный запрос
-    const lastIdResult = await dbGet('SELECT last_insert_rowid() as id');
+    const lastIdResult = await dbGet('SELECT LAST_INSERT_ID() as id');
     
     const entry = await dbGet(
-      `SELECT e.*, 
+      `SELECT e.*,
               da.name as debitAccountName,
               ca.name as creditAccountName
        FROM entries e
@@ -132,7 +132,7 @@ router.put('/:id', validateRequest(updateEntrySchema), async (req, res, next) =>
   try {
     const { id } = req.params
     const { date, description, debitAccountId, creditAccountId, amount, document } = req.validated
-    const now = new Date().toISOString()
+    const now = new Date().toISOString().replace('T', ' ').replace('Z', '')
     
     const existing = await dbGet('SELECT * FROM entries WHERE id = ?', [id])
     if (!existing) {
