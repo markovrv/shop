@@ -14,6 +14,20 @@ router.get('/', async (req, res, next) => {
     const accounts = await dbAll('SELECT * FROM accounts ORDER BY type, name')
     
     const balances = await Promise.all(accounts.map(async (account) => {
+      // Получаем обороты до startDate для корректировки начального баланса
+      const debitBeforeStart = await dbAll(
+        `SELECT COALESCE(SUM(amount), 0) as total FROM entries
+         WHERE debitAccountId = ? AND date < ?`,
+        [account.id, startDate]
+      )
+      
+      const creditBeforeStart = await dbAll(
+        `SELECT COALESCE(SUM(amount), 0) as total FROM entries
+         WHERE creditAccountId = ? AND date < ?`,
+        [account.id, startDate]
+      )
+      
+      // Получаем обороты в периоде startDate - endDate
       const debitResult = await dbAll(
         `SELECT COALESCE(SUM(amount), 0) as total FROM entries
          WHERE debitAccountId = ? AND date >= ? AND date <= ?`,
@@ -26,23 +40,45 @@ router.get('/', async (req, res, next) => {
         [account.id, startDate, endDate]
       )
       
+      const debitBefore = debitBeforeStart[0]?.total || 0
+      const creditBefore = creditBeforeStart[0]?.total || 0
       const debitSum = debitResult[0]?.total || 0
       const creditSum = creditResult[0]?.total || 0
       
-      // Расчет баланса в зависимости от типа счета
-      let balance
+      // Расчет скорректированного начального баланса в зависимости от типа счета
+      let adjustedInitialBalance = account.initialBalance;
+      switch (account.type) {
+        case 'asset': // Для активов: initialBalance = initialBalance + дебет - кредит
+          adjustedInitialBalance = account.initialBalance + debitBefore - creditBefore;
+          break;
+        case 'liability': // Для пассивов: initialBalance = initialBalance + кредит - дебет
+        case 'equity':   // Для капитала: initialBalance = initialBalance + кредит - дебет
+          adjustedInitialBalance = account.initialBalance + creditBefore - debitBefore;
+          break;
+        case 'income': // Для доходов: initialBalance = оборот по кредиту (показывает только оборот)
+          adjustedInitialBalance = creditBefore;
+          break;
+        case 'expense': // Для расходов: initialBalance = оборот по дебету (показывает только оборот)
+          adjustedInitialBalance = debitBefore;
+          break;
+        default:
+          adjustedInitialBalance = 0;
+      }
+      
+      // Расчет баланса на конец периода в зависимости от типа счета
+      let balance;
       switch (account.type) {
         case 'asset':
         case 'expense':
-          balance = account.initialBalance + debitSum - creditSum
-          break
+          balance = adjustedInitialBalance + debitSum - creditSum;
+          break;
         case 'liability':
         case 'equity':
         case 'income':
-          balance = account.initialBalance + creditSum - debitSum
-          break
+          balance = adjustedInitialBalance + creditSum - debitSum;
+          break;
         default:
-          balance = 0
+          balance = 0;
       }
       
       return {
@@ -50,6 +86,8 @@ router.get('/', async (req, res, next) => {
         accountName: account.name,
         accountType: account.type,
         initialBalance: account.initialBalance,
+        debitBefore, // Добавляем обороты до периода для отладки
+        creditBefore, // Добавляем обороты до периода для отладки
         debitSum,
         creditSum,
         balance

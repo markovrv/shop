@@ -39,7 +39,7 @@
           <tr v-for="balance in balances" :key="balance.accountId">
             <td>{{ balance.accountName }}</td>
             <td>{{ getAccountTypeTitle(balance.accountType) }}</td>
-            <td><span v-html="formatCurrency(balance.initialBalance)"></span></td>
+            <td><span v-html="formatCurrency(getAdjustedInitialBalance(balance))"></span></td>
             <td><span v-html="formatCurrency(balance.debitSum)"></span></td>
             <td><span v-html="formatCurrency(balance.creditSum)"></span></td>
             <td :style="{ fontWeight: 'bold', color: balance.balance >= 0 ? 'green' : 'red' }">
@@ -104,6 +104,23 @@ const handleDateChange = async () => {
     balances.value = response.data || []
   } catch (err) {
     uiStore.showError(err.message)
+  }
+}
+
+// Функция для расчета скорректированного начального баланса в зависимости от типа счета
+const getAdjustedInitialBalance = (balance) => {
+  switch (balance.accountType) {
+    case 'asset': // Для активов: initialBalance = initialBalance + дебет до периода - кредит до периода
+      return balance.initialBalance + (balance.debitBefore || 0) - (balance.creditBefore || 0);
+    case 'liability': // Для пассивов: initialBalance = initialBalance + кредит до периода - дебет до периода
+    case 'equity':   // Для капитала: initialBalance = initialBalance + кредит до периода - дебет до периода
+      return balance.initialBalance + (balance.creditBefore || 0) - (balance.debitBefore || 0);
+    case 'income': // Для доходов: initialBalance = оборот по кредиту до периода (показывает только оборот)
+      return balance.creditBefore || 0;
+    case 'expense': // Для расходов: initialBalance = оборот по дебету до периода (показывает только оборот)
+      return balance.debitBefore || 0;
+    default:
+      return 0;
   }
 }
 
