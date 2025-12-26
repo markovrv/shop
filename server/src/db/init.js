@@ -76,16 +76,6 @@ export async function initializeDatabase() {
     // Index might already exist, ignore error
   }
   try {
-    await dbRun(`CREATE INDEX idx_owners_email ON owners(email);`);
-  } catch (e) {
-    // Index might already exist, ignore error
-  }
-  try {
-    await dbRun(`CREATE INDEX idx_owners_phone ON owners(phone);`);
-  } catch (e) {
-    // Index might already exist, ignore error
-  }
-  try {
     await dbRun(`CREATE INDEX idx_owners_personal_account_id ON owners(personal_account_id);`);
   } catch (e) {
     // Index might already exist, ignore error

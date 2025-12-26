@@ -35,7 +35,7 @@ export const updateEntrySchema = entrySchema
 // Схемы валидации Zod для владельцев
 const ownerSchema = z.object({
   name: z.string().min(1, 'Name is required').max(255),
-  email: z.string().email('Invalid email format').optional(),
+  email: z.string().optional(),
   phone: z.string().max(255).optional(),
   notes: z.string().optional(),
   personal_account_id: z.number().int().positive('Personal account ID must be a positive integer').optional(),

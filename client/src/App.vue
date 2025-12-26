@@ -64,6 +64,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUiStore } from './stores/ui.js'
 import { useAccountsStore } from './stores/accounts.js'
+import { useOwnersStore } from './stores/owners.js'
 import { useEntriesStore } from './stores/entries.js'
 import { useTheme } from 'vuetify'
 import SettingsModal from './components/SettingsModal.vue'
@@ -75,11 +76,13 @@ const router = useRouter()
 const uiStore = useUiStore()
 const accountsStore = useAccountsStore()
 const entriesStore = useEntriesStore()
+const ownersStore = useOwnersStore()
 const theme = useTheme()
 
 const navItems = [
   { id: 'entries', title: 'Проводки', icon: 'mdi-book-multiple', route: '/entries' },
   { id: 'accounts', title: 'Счета', icon: 'mdi-file-document-multiple', route: '/accounts' },
+  { id: 'owners', title: 'Владельцы', icon: 'mdi-account-group', route: '/owners' },
   { id: 'balances', title: 'Остатки', icon: 'mdi-calculator', route: '/balances' }
 ]
 
@@ -109,6 +112,7 @@ const logout = () => {
 onMounted(async () => {
   await accountsStore.fetchAccounts()
   await entriesStore.fetchEntries()
+  await ownersStore.fetchOwners()
   if (sessionStorage.getItem('token')) {
     uiStore.setUserLoginState(true);
   } else {

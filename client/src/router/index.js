@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import EntriesPage from '../pages/EntriesPage.vue'
 import AccountsPage from '../pages/AccountsPage.vue'
+import OwnersPage from '../pages/OwnersPage.vue'
 import BalancesPage from '../pages/BalancesPage.vue'
 import LoginPage from '../pages/LoginPage.vue'
 
@@ -30,6 +31,12 @@ const router = createRouter({
       path: '/accounts',
       name: 'accounts',
       component: AccountsPage,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/owners',
+      name: 'owners',
+      component: OwnersPage,
       meta: { requiresAuth: true }
     },
     {

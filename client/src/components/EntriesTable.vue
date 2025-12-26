@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-card-title>Журнал проводок</v-card-title>
+    <v-card-title>Журнал проводок по счетам учёта</v-card-title>
     <v-table>
       <thead>
         <tr>

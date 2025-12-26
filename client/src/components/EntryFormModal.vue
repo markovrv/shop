@@ -163,3 +163,9 @@ const saveEntry = async () => {
    }
 }
 </script>
+
+<style scoped>
+  .v-col {
+    padding: 0 6px;
+  }
+</style>

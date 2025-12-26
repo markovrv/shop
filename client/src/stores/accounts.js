@@ -71,6 +71,8 @@ export const useAccountsStore = defineStore('accounts', () => {
     accounts.value.map(a => ({ title: a.name, value: a.id }))
   )
 
+  const getAccountById = (id) => (accounts.value.find(a => a.id === id )?.name)
+
   return {
     accounts,
     loading,
@@ -79,6 +81,7 @@ export const useAccountsStore = defineStore('accounts', () => {
     createAccount,
     updateAccount,
     deleteAccount,
-    accountOptions
+    accountOptions,
+    getAccountById
   }
 })

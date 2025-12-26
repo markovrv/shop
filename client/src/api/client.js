@@ -38,6 +38,13 @@ export const authApi = {
   login: (credentials) => axios.post(`${API_BASE_URL}/auth/login`, credentials)
 }
 
+export const ownersApi = {
+  getAll: () => api.get('/owners'),
+  create: (data) => api.post('/owners', data),
+  update: (id, data) => api.put(`/owners/${id}`, data),
+  delete: (id) => api.delete(`/owners/${id}`)
+}
+
 export const accountsApi = {
   getAll: () => api.get('/accounts'),
   create: (data) => api.post('/accounts', data),

@@ -13,7 +13,7 @@
     </v-row>
 
     <v-card>
-      <v-card-title>Список счетов</v-card-title>
+      <v-card-title>Список счетов учёта</v-card-title>
       <v-table>
         <thead>
           <tr>

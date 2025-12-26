@@ -5,8 +5,10 @@ export const useUiStore = defineStore('ui', () => {
   const userLoginState = ref(false)
   const showEntryModal = ref(false)
   const showAccountModal = ref(false)
+  const showOwnerModal = ref(false)
   const editingEntry = ref(null)
   const editingAccount = ref(null)
+  const editingOwner = ref(null)
   const snackbar = ref({
       show: false,
       message: '',
@@ -37,6 +39,16 @@ export const useUiStore = defineStore('ui', () => {
     showAccountModal.value = false
   }
 
+  const openOwnerModal = (owner = null) => {
+    editingOwner.value = owner
+    showOwnerModal.value = true
+  }
+
+  const closeOwnerModal = () => {
+    editingOwner.value = null
+    showOwnerModal.value = false
+  }
+
   const showSuccess = (message) => {
     snackbar.value = { show: true, message, type: 'success' }
     setTimeout(() => snackbar.value.show = false, 3000)
@@ -51,14 +63,18 @@ export const useUiStore = defineStore('ui', () => {
     userLoginState,
     showEntryModal,
     showAccountModal,
+    showOwnerModal,
     editingEntry,
     editingAccount,
+    editingOwner,
     snackbar,
     setUserLoginState,
     openEntryModal,
     closeEntryModal,
     openAccountModal,
     closeAccountModal,
+    openOwnerModal,
+    closeOwnerModal,
     showSuccess,
     showError
   }
