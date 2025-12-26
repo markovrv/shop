@@ -2,8 +2,12 @@ import express from 'express'
 import { dbRun, dbGet, dbAll } from '../db/connection.js'
 import { validateRequest, createEntrySchema, updateEntrySchema } from '../middleware/validator.js'
 import { logger } from '../utils/logger.js'
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router()
+
+// Защита всех маршрутов аутентификацией
+router.use(authenticateToken);
 
 // GET /api/entries - получить журнал с фильтрацией
 router.get('/', async (req, res, next) => {
@@ -96,7 +100,7 @@ router.post('/', validateRequest(createEntrySchema), async (req, res, next) => {
     }
     
     const now = new Date().toISOString().replace('T', ' ').replace('Z', '')
-    const result = await dbRun(
+    await dbRun(
       `INSERT INTO entries (date, description, debitAccountId, creditAccountId, amount, document, createdAt, updatedAt)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [date, description, debitAccountId, creditAccountId, amount, document, now, now]
@@ -163,9 +167,7 @@ router.put('/:id', validateRequest(updateEntrySchema), async (req, res, next) =>
     }
 
     // Проверяем, что дебетовый и кредитный счета не совпадают (если оба изменены)
-    if ((debitAccountId !== undefined && creditAccountId !== undefined && debitAccountId === creditAccountId) ||
-        (debitAccountId !== undefined && debitAccountId === existing.creditAccountId) ||
-        (creditAccountId !== undefined && creditAccountId === existing.debitAccountId)) {
+    if ((debitAccountId !== undefined && creditAccountId !== undefined && debitAccountId === creditAccountId)) {
       return res.status(400).json({
         success: false,
         error: 'Дебетовый и кредитный счета должны быть разными'

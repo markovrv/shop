@@ -8,7 +8,7 @@
             <v-col cols="12">
               <v-text-field v-model="apiUrl" label="API URL" @change="saveApiUrl"></v-text-field>
             </v-col>
-            <v-col cols="12">
+            <v-col cols="12" v-if="uiStore.userLoginState">
               <v-btn @click="recalculate">Пересчитать остатки</v-btn>
             </v-col>
           </v-row>

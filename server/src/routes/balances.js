@@ -1,8 +1,12 @@
 import express from 'express'
 import { dbAll } from '../db/connection.js'
 import { logger } from '../utils/logger.js'
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router()
+
+// Защита всех маршрутов аутентификацией
+router.use(authenticateToken);
 
 // GET /api/balances - получить остатки по счетам за период
 router.get('/', async (req, res, next) => {
@@ -86,8 +90,9 @@ router.get('/', async (req, res, next) => {
         accountName: account.name,
         accountType: account.type,
         initialBalance: account.initialBalance,
-        debitBefore, // Добавляем обороты до периода для отладки
-        creditBefore, // Добавляем обороты до периода для отладки
+        adjustedInitialBalance,
+        debitBefore,
+        creditBefore,
         debitSum,
         creditSum,
         balance

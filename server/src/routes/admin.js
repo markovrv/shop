@@ -1,8 +1,12 @@
 import express from 'express'
 import { dbAll, dbRun } from '../db/connection.js'
 import { logger } from '../utils/logger.js'
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router()
+
+// Защита всех маршрутов аутентификацией
+router.use(authenticateToken);
 
 // POST /api/admin/recalculate - перепровести все проводки
 router.post('/recalculate', async (req, res, next) => {
@@ -14,7 +18,6 @@ router.post('/recalculate', async (req, res, next) => {
       `SELECT * FROM entries ORDER BY date ASC, createdAt ASC`
     )
     
-    // Сбросить начальные балансы (опционально - если нужна полная пересчет)
     // Здесь мы просто логируем процесс
     
     let processed = 0

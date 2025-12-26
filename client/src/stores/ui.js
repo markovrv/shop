@@ -2,15 +2,20 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export const useUiStore = defineStore('ui', () => {
+  const userLoginState = ref(false)
   const showEntryModal = ref(false)
   const showAccountModal = ref(false)
   const editingEntry = ref(null)
   const editingAccount = ref(null)
- const snackbar = ref({
-    show: false,
-    message: '',
-    type: 'success'
-  })
+  const snackbar = ref({
+      show: false,
+      message: '',
+      type: 'success'
+    })
+
+  const setUserLoginState = (state) => {
+    userLoginState.value = state
+  }
 
   const openEntryModal = (entry = null) => {
     editingEntry.value = entry
@@ -43,11 +48,13 @@ export const useUiStore = defineStore('ui', () => {
   }
 
   return {
+    userLoginState,
     showEntryModal,
     showAccountModal,
     editingEntry,
     editingAccount,
     snackbar,
+    setUserLoginState,
     openEntryModal,
     closeEntryModal,
     openAccountModal,

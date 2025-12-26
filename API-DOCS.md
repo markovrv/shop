@@ -6,13 +6,15 @@
 
 **Формат ответов:** JSON
 
-**Аутентификация:** Не требуется (локальное приложение)
+**Аутентификация:** Требуется JWT токен в заголовке `Authorization: Bearer <token>`
 
 **Статус коды:**
 - `200` — успешно
 - `201` — создано
 - `400` — ошибка валидации
+- `401` — неавторизованный доступ
 - `404` — не найдено
+- `409` — конфликт (например, при попытке удалить счёт с проводками)
 - `500` — ошибка сервера
 
 ---
@@ -21,6 +23,8 @@
 
 ### GET /accounts
 Получить список всех счетов.
+
+**Аутентификация:** Требуется JWT токен в заголовке `Authorization: Bearer <token>`
 
 **Параметры:** нет
 
@@ -44,6 +48,8 @@
 
 ### POST /accounts
 Создать новый счет.
+
+**Аутентификация:** Требуется JWT токен в заголовке `Authorization: Bearer <token>`
 
 **Тело запроса:**
 ```json
@@ -77,6 +83,8 @@
 
 ### PUT /accounts/:id
 Обновить счет.
+
+**Аутентификация:** Требуется JWT токен в заголовке `Authorization: Bearer <token>`
 
 **Параметры пути:**
 - `id` (число) — ID счета
@@ -112,6 +120,8 @@
 ### DELETE /accounts/:id
 Удалить счет.
 
+**Аутентификация:** Требуется JWT токен в заголовке `Authorization: Bearer <token>`
+
 **Параметры пути:**
 - `id` (число) — ID счета
 
@@ -128,16 +138,19 @@
 ---
 
 ## Проводки (Entries)
-
 ### GET /entries
 Получить журнал проводок с фильтрацией.
+
+**Аутентификация:** Требуется JWT токен в заголовке `Authorization: Bearer <token>`
 
 **Query параметры:**
 - `fromDate` (ISO 8601, опционально) — дата начала (YYYY-MM-DD)
 - `toDate` (ISO 8601, опционально) — дата конца (YYYY-MM-DD)
 - `accountId` (число, опционально) — фильтр по счету (дебет или кредит)
+- `document` (число, опционально) — фильтр по документу
 - `page` (число, по умолчанию 1) — номер страницы
 - `limit` (число, по умолчанию 50) — записей на странице
+
 
 **Пример:**
 ```
@@ -173,6 +186,8 @@ GET /entries?fromDate=2025-12-01&toDate=2025-12-14&accountId=1&page=1&limit=20
 
 ### POST /entries
 Создать новую проводку.
+
+**Аутентификация:** Требуется JWT токен в заголовке `Authorization: Bearer <token>`
 
 **Тело запроса:**
 ```json
@@ -215,6 +230,8 @@ GET /entries?fromDate=2025-12-01&toDate=2025-12-14&accountId=1&page=1&limit=20
 ### PUT /entries/:id
 Обновить проводку.
 
+**Аутентификация:** Требуется JWT токен в заголовке `Authorization: Bearer <token>`
+
 **Параметры пути:**
 - `id` (число) — ID проводки
 
@@ -255,6 +272,8 @@ GET /entries?fromDate=2025-12-01&toDate=2025-12-14&accountId=1&page=1&limit=20
 ### DELETE /entries/:id
 Удалить проводку.
 
+**Аутентификация:** Требуется JWT токен в заголовке `Authorization: Bearer <token>`
+
 **Параметры пути:**
 - `id` (число) — ID проводки
 
@@ -272,6 +291,8 @@ GET /entries?fromDate=2025-12-01&toDate=2025-12-14&accountId=1&page=1&limit=20
 
 ### GET /balances
 Получить остатки по всем счетам за определённый период.
+
+**Аутентификация:** Требуется JWT токен в заголовке `Authorization: Bearer <token>`
 
 **Query параметры:**
 - `startDate` (ISO 8601, опционально) — начальная дата периода (по умолчанию: 200-01-01)
@@ -310,11 +331,12 @@ GET /balances?startDate=2025-01-01&endDate=2025-12-14
 - Для расходов (expense): `balance = дебет` (показывает оборот)
 
 ---
-
 ## Администрирование
-
 ### POST /admin/recalculate
 Перепровести все проводки и пересчитать остатки.
+
+**Аутентификация:** Требуется JWT токен в заголовке `Authorization: Bearer <token>`
+
 
 **Параметры:** нет
 
@@ -333,9 +355,11 @@ GET /balances?startDate=2025-01-01&endDate=2025-12-14
 ```
 
 ---
-
 ### GET /admin/health
 Проверка здоровья сервера.
+
+**Аутентификация:** Требуется JWT токен в заголовке `Authorization: Bearer <token>`
+
 
 **Ответ:**
 ```json
@@ -344,10 +368,14 @@ GET /balances?startDate=2025-01-01&endDate=2025-12-14
   "data": {
     "status": "ok",
     "database": "connected",
-    "uptime": 3600
+    "accountsTotal": 5,
+    "entriesTotal": 25,
+    "uptime": 3600,
+    "timestamp": "2025-12-26T10:00:00.000Z"
   }
 }
 ```
+
 
 ---
 
@@ -364,6 +392,14 @@ GET /balances?startDate=2025-01-01&endDate=2025-12-14
 }
 ```
 
+### 401 Unauthorized
+```json
+{
+  "success": false,
+  "error": "Access denied. Invalid or missing token"
+}
+```
+
 ### 404 Not Found
 ```json
 {
@@ -376,7 +412,7 @@ GET /balances?startDate=2025-01-01&endDate=2025-12-14
 ```json
 {
   "success": false,
-  "error": "Cannot delete account with existing entries"
+ "error": "Cannot delete account with existing entries"
 }
 ```
 
@@ -419,12 +455,61 @@ curl -X POST http://localhost:3000/api/entries \
 
 ### Получить остатки на дату
 ```bash
-curl http://localhost:3000/api/balances?date=2025-12-14
+curl -H "Authorization: Bearer <token>" http://localhost:3000/api/balances?date=2025-12-14
 ```
 
 ### Фильтрованный список проводок
 ```bash
-curl "http://localhost:3000/api/entries?fromDate=2025-12-01&toDate=2025-12-31&accountId=1"
+curl -H "Authorization: Bearer <token>" "http://localhost:3000/api/entries?fromDate=2025-12-01&toDate=2025-12-31&accountId=1"
+```
+
+---
+## Аутентификация
+
+Для доступа к API требуется JWT токен, который должен быть передан в заголовке `Authorization` в формате `Bearer <token>`.
+
+### POST /auth/login
+Аутентификация пользователя и получение JWT токена.
+
+**Аутентификация:** Не требуется
+
+**Тело запроса:**
+```json
+{
+  "login": "admin",
+  "password": "admin"
+}
+```
+
+**Поля:**
+- `login` (строка, обязательно) — логин пользователя (по умолчанию 'admin')
+- `password` (строка, обязательно) — пароль пользователя (по умолчанию 'admin')
+
+**Ответ при успешной аутентификации:**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "login": "admin"
+  }
+}
+```
+
+**Ответ при ошибке аутентификации:**
+```json
+{
+  "error": "Invalid login or password"
+}
+```
+
+**Пример запроса:**
+```bash
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "login": "admin",
+    "password": "admin"
+  }'
 ```
 
 ---
@@ -435,3 +520,6 @@ curl "http://localhost:3000/api/entries?fromDate=2025-12-01&toDate=2025-12-31&ac
 - Числовые значения (суммы) хранятся как целые числа в копейках или минимальных единицах для точности
 - Удаление объектов необратимо
 - История изменений проводок не ведётся (изменение перезаписывает старые значения)
+- Все endpoint'ы, кроме `/auth/login`, требуют аутентификации через JWT токен
+- Токен действителен 10 лет с момента выдачи
+

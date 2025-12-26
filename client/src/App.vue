@@ -1,42 +1,44 @@
 <template>
   <v-app>
     <v-app-bar app color="primary" dark>
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+      <v-app-bar-nav-icon @click.stop="drawer = !drawer;"></v-app-bar-nav-icon>
       <v-toolbar-title>Бухгалтерский учет</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-theme-provider :theme="$vuetify.theme.global.current">
         <v-btn icon @click="toggleTheme">
-          <v-icon>{{ $vuetify.theme.global.current.dark ? 'mdi-white-balance-sunny' : 'mdi-moon-waning-crescent' }}</v-icon>
+          <v-icon>{{ $vuetify.theme.global.current.dark ? 'mdi-white-balance-sunny' : 'mdi-moon-waning-crescent'
+            }}</v-icon>
         </v-btn>
       </v-theme-provider>
     </v-app-bar>
 
     <v-navigation-drawer v-model="drawer" app>
       <v-list>
-        <v-list-item
-          v-for="item in navItems"
-          :key="item.id"
-          :to="item.route"
-          :active="isActiveRoute(item.id)"
-          exact
-        >
-          <template v-slot:prepend>
-            <v-icon>{{ item.icon }}</v-icon>
-          </template>
-          <v-list-item-title>{{ item.title }}</v-list-item-title>
-        </v-list-item>
+        <template v-if="isAuthenticated">
+          <v-list-item v-for="item in navItems" :key="item.id" :to="item.route" :active="isActiveRoute(item.id)" exact>
+            <template v-slot:prepend>
+              <v-icon>{{ item.icon }}</v-icon>
+            </template>
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
+          </v-list-item>
+        </template>
       </v-list>
-      <v-divider></v-divider>
+      <v-divider v-if="isAuthenticated"></v-divider>
       <v-list>
-        <v-list-item
-          color="warning"
-          @click="openSettingsModal"
-        >
+        <v-list-item color="warning" @click="openSettingsModal">
           <template v-slot:prepend>
             <v-icon>mdi-cog</v-icon>
           </template>
           <v-list-item-title>Параметры</v-list-item-title>
         </v-list-item>
+        <template v-if="isAuthenticated">
+          <v-list-item color="error" @click="logout">
+            <template v-slot:prepend>
+              <v-icon>mdi-logout</v-icon>
+            </template>
+            <v-list-item-title>Выход</v-list-item-title>
+          </v-list-item>
+        </template>
       </v-list>
     </v-navigation-drawer>
 
@@ -47,22 +49,18 @@
     </v-main>
 
     <!-- Snackbar для уведомлений -->
-    <v-snackbar
-      v-model="uiStore.snackbar.show"
-      :type="uiStore.snackbar.type"
-      :timeout="3000"
-      top
-    >
+    <v-snackbar v-model="uiStore.snackbar.show" :type="uiStore.snackbar.type" :timeout="3000" top>
       {{ uiStore.snackbar.message }}
     </v-snackbar>
 
     <!-- Settings Modal -->
     <SettingsModal v-model="showSettings" />
+
   </v-app>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUiStore } from './stores/ui.js'
 import { useAccountsStore } from './stores/accounts.js'
@@ -85,6 +83,10 @@ const navItems = [
   { id: 'balances', title: 'Остатки', icon: 'mdi-calculator', route: '/balances' }
 ]
 
+const isAuthenticated = computed(() => {
+  return uiStore.userLoginState
+});
+
 const isActiveRoute = (routeId) => {
   return route.name === routeId || route.path.includes(routeId)
 }
@@ -97,12 +99,20 @@ const openSettingsModal = () => {
   showSettings.value = true
 }
 
+const logout = () => {
+  sessionStorage.removeItem('token');
+  router.push('/login'); // Перенаправляем на страницу входа
+  uiStore.showSuccess('Вы вышли из системы', 'info');
+  uiStore.setUserLoginState(false);
+};
+
 onMounted(async () => {
   await accountsStore.fetchAccounts()
   await entriesStore.fetchEntries()
+  if (sessionStorage.getItem('token')) {
+    uiStore.setUserLoginState(true);
+  } else {
+    uiStore.setUserLoginState(false);
+  }
 })
 </script>
-
-<style scoped>
-/* Add any global styles here */
-</style>

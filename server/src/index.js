@@ -38,11 +38,13 @@ import accountsRouter from './routes/accounts.js';
 import entriesRouter from './routes/entries.js';
 import balancesRouter from './routes/balances.js';
 import adminRouter from './routes/admin.js';
+import authRouter from './routes/auth.js';
 
 app.use('/api/accounts', accountsRouter);
 app.use('/api/entries', entriesRouter);
 app.use('/api/balances', balancesRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/auth', authRouter);
 
 // Обработчик 404 для несуществующих маршрутов
 app.use(notFoundHandler);

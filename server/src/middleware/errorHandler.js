@@ -1,4 +1,8 @@
 import { logger } from '../utils/logger.js';
+import dotenv from 'dotenv';
+
+// Загружаем переменные окружения
+dotenv.config({path: '../../.env'}); 
 
 export const errorHandler = (err, req, res, next) => {
   logger.error('Unhandled error:', err);

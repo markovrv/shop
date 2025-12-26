@@ -2,8 +2,12 @@ import express from 'express'
 import { dbRun, dbGet, dbAll } from '../db/connection.js'
 import { validateRequest, createAccountSchema, updateAccountSchema } from '../middleware/validator.js'
 import { logger } from '../utils/logger.js'
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router()
+
+// Защита всех маршрутов аутентификацией
+router.use(authenticateToken);
 
 // GET /api/accounts - получить все счета
 router.get('/', async (req, res, next) => {
@@ -25,7 +29,7 @@ router.post('/', validateRequest(createAccountSchema), async (req, res, next) =>
     const { name, type, initialBalance } = req.validated
     const now = new Date().toISOString().replace('T', ' ').replace('Z', '')
     
-    const result = await dbRun(
+    await dbRun(
       `INSERT INTO accounts (name, type, initialBalance, createdAt, updatedAt) 
        VALUES (?, ?, ?, ?, ?)`,
       [name, type, initialBalance, now, now]

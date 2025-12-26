@@ -12,7 +12,7 @@ export async function initializeDatabase() {
       createdAt DATETIME NOT NULL,
       updatedAt DATETIME NOT NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
- `);
+  `);
 
   // Create entries table
   await dbRun(`
@@ -33,29 +33,20 @@ export async function initializeDatabase() {
 
   // Create indexes for better performance
   try {
-    await dbRun(`CREATE INDEX IF NOT EXISTS idx_entries_date ON entries(date);`);
+    await dbRun(`CREATE INDEX idx_entries_date ON entries(date);`);
   } catch (e) {
     // Index might already exist, ignore error
   }
   try {
-    await dbRun(`CREATE INDEX IF NOT EXISTS idx_entries_debitAccountId ON entries(debitAccountId);`);
+    await dbRun(`CREATE INDEX idx_entries_debitAccountId ON entries(debitAccountId);`);
   } catch (e) {
     // Index might already exist, ignore error
   }
   try {
-    await dbRun(`CREATE INDEX IF NOT EXISTS idx_entries_creditAccountId ON entries(creditAccountId);`);
+    await dbRun(`CREATE INDEX idx_entries_creditAccountId ON entries(creditAccountId);`);
   } catch (e) {
     // Index might already exist, ignore error
   }
 
   logger.info('Database initialized successfully');
-}
-
-// Function to reset database (useful for testing)
-export async function resetDatabase() {
-  await dbRun('DROP TABLE IF EXISTS entries;');
-  await dbRun('DROP TABLE IF EXISTS accounts;');
-
-  logger.info('Database reset successfully');
-  await initializeDatabase();
 }
