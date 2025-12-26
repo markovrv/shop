@@ -48,5 +48,70 @@ export async function initializeDatabase() {
     // Index might already exist, ignore error
   }
 
+  // Create owners table
+  await dbRun(`
+    CREATE TABLE IF NOT EXISTS owners (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      email VARCHAR(25) NULL,
+      phone VARCHAR(255) NULL,
+      notes TEXT NULL,
+      personal_account_id INT,
+      revenue_account_id INT,
+      cash_account_id INT,
+      bank_account_id INT,
+      createdAt DATETIME NOT NULL,
+      updatedAt DATETIME NOT NULL,
+      FOREIGN KEY (personal_account_id) REFERENCES accounts(id) ON DELETE SET NULL,
+      FOREIGN KEY (revenue_account_id) REFERENCES accounts(id) ON DELETE SET NULL,
+      FOREIGN KEY (cash_account_id) REFERENCES accounts(id) ON DELETE SET NULL,
+      FOREIGN KEY (bank_account_id) REFERENCES accounts(id) ON DELETE SET NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `);
+
+  // Create indexes for the owners table
+  try {
+    await dbRun(`CREATE INDEX idx_owners_name ON owners(name);`);
+  } catch (e) {
+    // Index might already exist, ignore error
+  }
+  try {
+    await dbRun(`CREATE INDEX idx_owners_email ON owners(email);`);
+  } catch (e) {
+    // Index might already exist, ignore error
+  }
+  try {
+    await dbRun(`CREATE INDEX idx_owners_phone ON owners(phone);`);
+  } catch (e) {
+    // Index might already exist, ignore error
+  }
+  try {
+    await dbRun(`CREATE INDEX idx_owners_personal_account_id ON owners(personal_account_id);`);
+  } catch (e) {
+    // Index might already exist, ignore error
+  }
+  try {
+    await dbRun(`CREATE INDEX idx_owners_revenue_account_id ON owners(revenue_account_id);`);
+  } catch (e) {
+    // Index might already exist, ignore error
+  }
+  try {
+    await dbRun(`CREATE INDEX idx_owners_cash_account_id ON owners(cash_account_id);`);
+  } catch (e) {
+    // Index might already exist, ignore error
+  }
+  try {
+    await dbRun(`CREATE INDEX idx_owners_bank_account_id ON owners(bank_account_id);`);
+  } catch (e) {
+    // Index might already exist, ignore error
+  }
+
+  // Add constraint to ensure name is not empty
+  try {
+    await dbRun(`ALTER TABLE owners ADD CONSTRAINT chk_owners_name_not_empty CHECK (name != '');`);
+  } catch (e) {
+    // Constraint might already exist or not be supported by the MySQL version, ignore error
+  }
+
   logger.info('Database initialized successfully');
 }

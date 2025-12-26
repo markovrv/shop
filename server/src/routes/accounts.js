@@ -111,7 +111,7 @@ router.put('/:id', validateRequest(updateAccountSchema), async (req, res, next) 
     if (error.message.includes('UNIQUE constraint failed')) {
       return res.status(400).json({
         success: false,
-        error: 'Счёт с таким названием уде существует'
+        error: 'Счёт с таким названием уже существует'
       })
     }
     logger.error('Ошибка обновления счёта:', error)

@@ -31,6 +31,23 @@ export const createEntrySchema = entrySchema;
 export const updateEntrySchema = entrySchema
   .partial(); // Разрешаем изменять все поля, включая счета
 
+
+// Схемы валидации Zod для владельцев
+const ownerSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(255),
+  email: z.string().email('Invalid email format').optional(),
+  phone: z.string().max(255).optional(),
+  notes: z.string().optional(),
+  personal_account_id: z.number().int().positive('Personal account ID must be a positive integer').optional(),
+  revenue_account_id: z.number().int().positive('Revenue account ID must be a positive integer').optional(),
+  cash_account_id: z.number().int().positive('Cash account ID must be a positive integer').optional(),
+  bank_account_id: z.number().int().positive('Bank account ID must be a positive integer').optional()
+});
+
+export const createOwnerSchema = ownerSchema;
+export const updateOwnerSchema = ownerSchema
+  .partial(); // Разрешаем изменять все поля, включая счета
+
 // Middleware для валидации
 export const validateRequest = (schema) => {
   return (req, res, next) => {
