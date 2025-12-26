@@ -103,5 +103,47 @@ export async function initializeDatabase() {
     // Constraint might already exist or not be supported by the MySQL version, ignore error
   }
 
+  // Create employees table
+  await dbRun(`
+    CREATE TABLE IF NOT EXISTS employees (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      phone VARCHAR(25) NULL,
+      email VARCHAR(255) NULL,
+      daily_salary DECIMAL(10,2) NULL,
+      bonus_percentage DECIMAL(5,2) NULL,
+      salary_account_id INT,
+      personal_account_id INT,
+      createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      FOREIGN KEY (salary_account_id) REFERENCES accounts(id) ON DELETE SET NULL,
+      FOREIGN KEY (personal_account_id) REFERENCES accounts(id) ON DELETE SET NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `);
+
+  // Create indexes for the employees table
+  try {
+    await dbRun(`CREATE INDEX idx_employees_name ON employees(name);`);
+  } catch (e) {
+    // Index might already exist, ignore error
+  }
+  try {
+    await dbRun(`CREATE INDEX idx_employees_salary_account_id ON employees(salary_account_id);`);
+  } catch (e) {
+    // Index might already exist, ignore error
+  }
+  try {
+    await dbRun(`CREATE INDEX idx_employees_personal_account_id ON employees(personal_account_id);`);
+  } catch (e) {
+    // Index might already exist, ignore error
+  }
+
+  // Add constraint to ensure name is not empty
+  try {
+    await dbRun(`ALTER TABLE employees ADD CONSTRAINT chk_employees_name_not_empty CHECK (name != '');`);
+  } catch (e) {
+    // Constraint might already exist or not be supported by the MySQL version, ignore error
+  }
+
   logger.info('Database initialized successfully');
 }

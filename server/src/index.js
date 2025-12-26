@@ -6,7 +6,7 @@ import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { logger } from './utils/logger.js';
 
 // Загружаем переменные окружения
-dotenv.config({path: '../.env'}); 
+dotenv.config({path: './.env'});
 
 // Инициализируем приложение
 const app = express();
@@ -38,6 +38,7 @@ import accountsRouter from './routes/accounts.js';
 import entriesRouter from './routes/entries.js';
 import balancesRouter from './routes/balances.js';
 import ownersRouter from './routes/owners.js';
+import employeesRouter from './routes/employees.js';
 import adminRouter from './routes/admin.js';
 import authRouter from './routes/auth.js';
 
@@ -45,6 +46,7 @@ app.use('/api/accounts', accountsRouter);
 app.use('/api/entries', entriesRouter);
 app.use('/api/balances', balancesRouter);
 app.use('/api/owners', ownersRouter);
+app.use('/api/employees', employeesRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/auth', authRouter);
 

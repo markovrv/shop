@@ -48,6 +48,33 @@ export const createOwnerSchema = ownerSchema;
 export const updateOwnerSchema = ownerSchema
   .partial(); // Разрешаем изменять все поля, включая счета
 
+// Схемы валидации Zod для сотрудников
+const employeeSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(255),
+  phone: z.string().max(255).optional(),
+  email: z.string().email('Invalid email format').optional(),
+  daily_salary: z.preprocess((val) => {
+    if (typeof val === 'string') {
+      const parsed = parseFloat(val);
+      return isNaN(parsed) ? val : parsed;
+    }
+    return val;
+  }, z.number().positive('Daily salary must be a positive number').optional()),
+  bonus_percentage: z.preprocess((val) => {
+    if (typeof val === 'string') {
+      const parsed = parseFloat(val);
+      return isNaN(parsed) ? val : parsed;
+    }
+    return val;
+  }, z.number().min(0, 'Bonus percentage must be between 0 and 100').max(100, 'Bonus percentage must be between 0 and 100').optional()),
+  salary_account_id: z.number().int().positive('Salary account ID must be a positive integer').optional(),
+  personal_account_id: z.number().int().positive('Personal account ID must be a positive integer').optional()
+});
+
+export const createEmployeeSchema = employeeSchema;
+export const updateEmployeeSchema = employeeSchema
+  .partial(); // Разрешаем изменять все поля
+
 // Middleware для валидации
 export const validateRequest = (schema) => {
   return (req, res, next) => {
