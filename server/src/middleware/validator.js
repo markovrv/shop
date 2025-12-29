@@ -35,13 +35,13 @@ export const updateEntrySchema = entrySchema
 // Схемы валидации Zod для владельцев
 const ownerSchema = z.object({
   name: z.string().min(1, 'Name is required').max(255),
-  email: z.string().optional(),
-  phone: z.string().max(255).optional(),
-  notes: z.string().optional(),
-  personal_account_id: z.number().int().positive('Personal account ID must be a positive integer').optional(),
-  revenue_account_id: z.number().int().positive('Revenue account ID must be a positive integer').optional(),
-  cash_account_id: z.number().int().positive('Cash account ID must be a positive integer').optional(),
-  bank_account_id: z.number().int().positive('Bank account ID must be a positive integer').optional()
+  email: z.string().nullable().optional(),
+  phone: z.string().max(255).nullable().optional(),
+  notes: z.string().nullable().optional(),
+  personal_account_id: z.number().int().positive('Personal account ID must be a positive integer').nullable().optional(),
+  revenue_account_id: z.number().int().positive('Revenue account ID must be a positive integer').nullable().optional(),
+  cash_account_id: z.number().int().positive('Cash account ID must be a positive integer').nullable().optional(),
+  bank_account_id: z.number().int().positive('Bank account ID must be a positive integer').nullable().optional()
 });
 
 export const createOwnerSchema = ownerSchema;
@@ -51,8 +51,8 @@ export const updateOwnerSchema = ownerSchema
 // Схемы валидации Zod для сотрудников
 const employeeSchema = z.object({
   name: z.string().min(1, 'Name is required').max(255),
-  phone: z.string().max(255).optional(),
-  email: z.string().email('Invalid email format').optional(),
+  phone: z.string().max(255).nullable().optional(),
+  email: z.string().nullable().optional(),
   daily_salary: z.preprocess((val) => {
     if (typeof val === 'string') {
       const parsed = parseFloat(val);
@@ -67,8 +67,8 @@ const employeeSchema = z.object({
     }
     return val;
   }, z.number().min(0, 'Bonus percentage must be between 0 and 100').max(100, 'Bonus percentage must be between 0 and 100').optional()),
-  salary_account_id: z.number().int().positive('Salary account ID must be a positive integer').optional(),
-  personal_account_id: z.number().int().positive('Personal account ID must be a positive integer').optional()
+  salary_account_id: z.number().int().positive('Salary account ID must be a positive integer').nullable().optional(),
+  personal_account_id: z.number().int().positive('Personal account ID must be a positive integer').nullable().optional()
 });
 
 export const createEmployeeSchema = employeeSchema;

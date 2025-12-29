@@ -18,12 +18,12 @@
         ></v-text-field>
       </v-col>
       <v-col cols="12" md="6">
-        <v-btn color="primary" @click="handleDateChange">Показать остатки</v-btn>
+        <v-btn color="primary" @click="handleDateChange">Показать обороты</v-btn>
       </v-col>
     </v-row>
 
     <v-card>
-      <v-card-title>Остатки по счетам за период с {{ startDate }} по {{ endDate }}</v-card-title>
+      <v-card-title>Обороты по счетам за период с {{ startDate }} по {{ endDate }}</v-card-title>
       <v-table>
         <thead>
           <tr>

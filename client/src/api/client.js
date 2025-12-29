@@ -63,6 +63,13 @@ export const balancesApi = {
   getAll: (startDate, endDate) => api.get('/balances', { params: { startDate, endDate } })
 }
 
+export const employeesApi = {
+  getAll: () => api.get('/employees'),
+  create: (data) => api.post('/employees', data),
+  update: (id, data) => api.put(`/employees/${id}`, data),
+  delete: (id) => api.delete(`/employees/${id}`)
+}
+
 export const adminApi = {
   recalculate: () => api.post('/admin/recalculate'),
   health: () => api.get('/admin/health')

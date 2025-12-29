@@ -2,7 +2,7 @@
   <v-app>
     <v-app-bar app color="primary" dark>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer;"></v-app-bar-nav-icon>
-      <v-toolbar-title>Бухгалтерский учет</v-toolbar-title>
+      <v-toolbar-title>Домик</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-theme-provider :theme="$vuetify.theme.global.current">
         <v-btn icon @click="toggleTheme">
@@ -66,6 +66,7 @@ import { useUiStore } from './stores/ui.js'
 import { useAccountsStore } from './stores/accounts.js'
 import { useOwnersStore } from './stores/owners.js'
 import { useEntriesStore } from './stores/entries.js'
+import { useEmployeesStore } from './stores/employees.js'
 import { useTheme } from 'vuetify'
 import SettingsModal from './components/SettingsModal.vue'
 
@@ -77,13 +78,15 @@ const uiStore = useUiStore()
 const accountsStore = useAccountsStore()
 const entriesStore = useEntriesStore()
 const ownersStore = useOwnersStore()
+const employeesStore = useEmployeesStore()
 const theme = useTheme()
 
 const navItems = [
   { id: 'entries', title: 'Проводки', icon: 'mdi-book-multiple', route: '/entries' },
+  { id: 'balances', title: 'Обороты', icon: 'mdi-calculator', route: '/balances' },
   { id: 'accounts', title: 'Счета', icon: 'mdi-file-document-multiple', route: '/accounts' },
-  { id: 'owners', title: 'Владельцы', icon: 'mdi-account-group', route: '/owners' },
-  { id: 'balances', title: 'Остатки', icon: 'mdi-calculator', route: '/balances' }
+  { id: 'owners', title: 'Владельцы', icon: 'mdi-account-tie', route: '/owners' },
+  { id: 'employees', title: 'Сотрудники', icon: 'mdi-account-group', route: '/employees' },
 ]
 
 const isAuthenticated = computed(() => {
@@ -113,6 +116,7 @@ onMounted(async () => {
   await accountsStore.fetchAccounts()
   await entriesStore.fetchEntries()
   await ownersStore.fetchOwners()
+  await employeesStore.fetchEmployees()
   if (sessionStorage.getItem('token')) {
     uiStore.setUserLoginState(true);
   } else {
